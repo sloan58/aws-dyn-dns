@@ -1,0 +1,18 @@
+<?php
+
+return [
+    'aws' => [
+        'profile' => 'default',
+        'region' => 'us-east-1',
+        'version' => 'latest'
+    ],
+    'domains' => [
+        [
+            'name' => 'yourdomain.com',
+            'validateTld' => true, // should we check that your root domain points to your public IP?
+            'subdomains' => [
+                'caddy-test' // all subdomains to check (optional)
+            ]
+        ],
+    ]
+];
