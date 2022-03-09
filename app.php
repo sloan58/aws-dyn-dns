@@ -45,13 +45,13 @@ function processZone($fullDomain, $managedZone = null)
 
     $domainARecord = getPublicIpAddressFor($fullDomain);
     $myPublicIp = myPublicIpAddress();
-    $logger->info('@processZone: DNS lookup results', [
-        'fullDomain' => $fullDomain,
-        'domainARecord' => $domainARecord,
-        'myPublicIp' => $myPublicIp
-    ]);
 
     if(($domainARecord and $myPublicIp) and ($domainARecord != $myPublicIp)) {
+        $logger->info('@processZone: DNS needs to be updated for this A record', [
+            'fullDomain' => $fullDomain,
+            'domainARecord' => $domainARecord,
+            'myPublicIp' => $myPublicIp
+        ]);
         $hostedZone = getHostedZone($managedZone);
 
         if(!empty($hostedZone)) {
