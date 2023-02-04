@@ -21,15 +21,16 @@ $sharedConfig = [
 $sdk = new Aws\Sdk($sharedConfig);
 $r53 = $sdk->createRoute53();
 
-foreach($config['domains'] as $domain) {
+$logger->info('running');
+foreach ($config['domains'] as $domain) {
 
     $managedZone = $domain['name'];
 
-    if($domain['validateTld']) {
+    if ($domain['validateTld']) {
         processZone($managedZone);
     }
 
-    foreach($domain['subdomains'] as $subdomain) {
+    foreach ($domain['subdomains'] as $subdomain) {
         $fullDomain = empty($subdomain)
             ? $managedZone
             : sprintf('%s.%s', $subdomain, $managedZone);
@@ -46,7 +47,7 @@ function processZone($fullDomain, $managedZone = null)
     $domainARecord = getPublicIpAddressFor($fullDomain);
     $myPublicIp = myPublicIpAddress();
 
-    if(($domainARecord and $myPublicIp) and ($domainARecord != $myPublicIp)) {
+    if ($domainARecord != $myPublicIp) {
         $logger->info('@processZone: DNS needs to be updated for this A record', [
             'fullDomain' => $fullDomain,
             'domainARecord' => $domainARecord,
@@ -54,12 +55,12 @@ function processZone($fullDomain, $managedZone = null)
         ]);
         $hostedZone = getHostedZone($managedZone);
 
-        if(!empty($hostedZone)) {
+        if (!empty($hostedZone)) {
             $zoneIdResponse = $hostedZone['Id'];
             $zoneId = explode('/', $zoneIdResponse)[2] ?? null;
-            if($zoneId) {
+            if ($zoneId) {
                 $success = updateRoute53ARecord($fullDomain, $myPublicIp, $zoneId);
-                if($success) {
+                if ($success) {
                     $logger->info('@processZone: Successfully updated Route53 A record');
                 } else {
                     $logger->error('@processZone: Could not update Route53 A record');
@@ -74,9 +75,9 @@ function getHostedZone($managedZone)
     global $r53;
 
     $out = $r53->listHostedZones();
-    return array_values(array_filter($out['HostedZones'], function($zone) use ($managedZone) {
-            return $zone['Name'] == $managedZone . '.';
-        }))[0] ?? [];
+    return array_values(array_filter($out['HostedZones'], function ($zone) use ($managedZone) {
+        return $zone['Name'] == $managedZone . '.';
+    }))[0] ?? [];
 }
 
 function myPublicIpAddress()
@@ -90,7 +91,8 @@ function myPublicIpAddress()
 function getPublicIpAddressFor($domain)
 {
     return filter_var(
-        gethostbyname($domain), FILTER_VALIDATE_IP
+        gethostbyname($domain),
+        FILTER_VALIDATE_IP
     ) ?: false;
 }
 
